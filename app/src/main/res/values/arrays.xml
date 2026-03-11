@@ -591,6 +591,14 @@
         <item>2.6</item>
         <item>2.8</item>
     </string-array>
+    <string-array name="preference_video_stabilization_mode_entries">
+        <item>@string/preference_video_stabilization_mode_eis_only</item>
+        <item>@string/preference_video_stabilization_mode_hybrid</item>
+    </string-array>
+    <string-array name="preference_video_stabilization_mode_values">
+        <item>eis_only</item>
+        <item>hybrid</item>
+    </string-array>
     <string-array name="preference_record_audio_src_entries">
         <item>@string/preference_record_audio_src_camcorder</item>
         <item>@string/preference_record_audio_src_mic</item>

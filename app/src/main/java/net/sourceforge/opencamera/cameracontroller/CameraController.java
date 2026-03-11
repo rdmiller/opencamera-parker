@@ -559,6 +559,12 @@ public abstract class CameraController {
      *  capture video.
      */
     public abstract void setVideoStabilization(boolean enabled);
+    /** Enable hybrid stabilization (EIS + OIS simultaneously).
+     *  Default implementation just calls setVideoStabilization.
+     */
+    public void setVideoStabilizationHybrid(boolean eis_enabled, boolean keep_ois) {
+        setVideoStabilization(eis_enabled);
+    }
     public abstract boolean getVideoStabilization();
     public enum TonemapProfile {
         TONEMAPPROFILE_OFF,

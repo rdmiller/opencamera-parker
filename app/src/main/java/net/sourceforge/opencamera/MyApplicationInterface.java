@@ -729,6 +729,11 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         return sharedPreferences.getBoolean(PreferenceKeys.VideoStabilizationPreferenceKey, false);
     }
 
+    public boolean getVideoStabilizationHybridPref() {
+        String mode = sharedPreferences.getString(PreferenceKeys.VideoStabilizationModePreferenceKey, "eis_only");
+        return mode.equals("hybrid");
+    }
+
     @Override
     public boolean getForce4KPref() {
         return cameraId == 0 && sharedPreferences.getBoolean(PreferenceKeys.ForceVideo4KPreferenceKey, false) && main_activity.supportsForceVideo4K();

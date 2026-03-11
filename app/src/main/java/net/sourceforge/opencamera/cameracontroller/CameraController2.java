@@ -423,6 +423,7 @@ public class CameraController2 extends CameraController {
         private int face_detect_mode = CaptureRequest.STATISTICS_FACE_DETECT_MODE_OFF;
         private Integer default_optical_stabilization;
         private boolean video_stabilization;
+        private boolean keep_ois_with_eis; // hybrid mode: keep OIS on when EIS is enabled
         private TonemapProfile tonemap_profile = TonemapProfile.TONEMAPPROFILE_OFF;
         private float log_profile_strength; // for TONEMAPPROFILE_LOG
         private float gamma_profile; // for TONEMAPPROFILE_GAMMA
@@ -1043,8 +1044,8 @@ public class CameraController2 extends CameraController {
 
             builder.set(CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE, video_stabilization ? CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE_ON : CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE_OFF);
             if( supports_optical_stabilization ) {
-                if( video_stabilization ) {
-                    // should also disable OIS
+                if( video_stabilization && !keep_ois_with_eis ) {
+                    // EIS only: disable OIS to avoid conflicts (original behavior)
                     if( default_optical_stabilization == null ) {
                         // save the default optical_stabilization
                         default_optical_stabilization = builder.get(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE);
@@ -1052,6 +1053,12 @@ public class CameraController2 extends CameraController {
                             Log.d(TAG, "default_optical_stabilization: " + default_optical_stabilization);
                     }
                     builder.set(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE, CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE_OFF);
+                }
+                else if( video_stabilization && keep_ois_with_eis ) {
+                    // Hybrid mode: keep OIS enabled alongside EIS
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "hybrid stabilization: keeping OIS on with EIS");
+                    builder.set(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE, CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE_ON);
                 }
                 else if( default_optical_stabilization != null ) {
                     if( builder.get(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE) != null && !builder.get(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE).equals(default_optical_stabilization) ) {
@@ -5084,12 +5091,28 @@ public class CameraController2 extends CameraController {
         if( MyDebug.LOG )
             Log.d(TAG, "setVideoStabilization: " + enabled);
         camera_settings.video_stabilization = enabled;
+        camera_settings.keep_ois_with_eis = false;
         camera_settings.setStabilization(previewBuilder);
         try {
             setRepeatingRequest();
         }
         catch(CameraAccessException e) {
             MyDebug.logStackTrace(TAG, "failed to set video stabilization", e);
+        }
+    }
+
+    @Override
+    public void setVideoStabilizationHybrid(boolean eis_enabled, boolean keep_ois) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "setVideoStabilizationHybrid: eis=" + eis_enabled + " keep_ois=" + keep_ois);
+        camera_settings.video_stabilization = eis_enabled;
+        camera_settings.keep_ois_with_eis = keep_ois;
+        camera_settings.setStabilization(previewBuilder);
+        try {
+            setRepeatingRequest();
+        }
+        catch(CameraAccessException e) {
+            MyDebug.logStackTrace(TAG, "failed to set hybrid stabilization", e);
         }
     }
 

@@ -2784,9 +2784,17 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             }
             if( this.supports_video_stabilization ) {
                 boolean using_video_stabilization = is_video && applicationInterface.getVideoStabilizationPref();
-                if( MyDebug.LOG )
+                boolean hybrid = applicationInterface.getVideoStabilizationHybridPref();
+                if( MyDebug.LOG ) {
                     Log.d(TAG, "using_video_stabilization?: " + using_video_stabilization);
-                camera_controller.setVideoStabilization(using_video_stabilization);
+                    Log.d(TAG, "hybrid stabilization?: " + hybrid);
+                }
+                if( hybrid && using_video_stabilization ) {
+                    camera_controller.setVideoStabilizationHybrid(true, true);
+                }
+                else {
+                    camera_controller.setVideoStabilization(using_video_stabilization);
+                }
             }
             if( MyDebug.LOG )
                 Log.d(TAG, "supports_video_stabilization?: " + supports_video_stabilization);

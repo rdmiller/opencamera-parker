@@ -157,6 +157,21 @@ public class PreferenceSubVideo extends PreferenceSubScreen {
             //PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_screen_video_settings");
             PreferenceGroup pg = (PreferenceGroup)this.findPreference("preferences_root");
             pg.removePreference(pref);
+            // also remove the stabilization mode preference
+            pref = findPreference(PreferenceKeys.VideoStabilizationModePreferenceKey);
+            if( pref != null )
+                pg.removePreference(pref);
+        }
+        else {
+            // hide stabilization mode if OIS not supported (no point in hybrid mode)
+            boolean supports_ois = bundle.getBoolean("supports_optical_stabilization", false);
+            if( !supports_ois ) {
+                Preference pref = findPreference(PreferenceKeys.VideoStabilizationModePreferenceKey);
+                if( pref != null ) {
+                    PreferenceGroup pg = (PreferenceGroup)this.findPreference("preferences_root");
+                    pg.removePreference(pref);
+                }
+            }
         }
 
         if( !supports_force_video_4k || video_quality == null ) {
