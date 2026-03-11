@@ -561,6 +561,8 @@
     <string name="preference_record_audio_src_unprocessed">Unprocessed</string>
     <string name="preference_force_16bit_audio">Force 16-bit audio</string>
     <string name="preference_force_16bit_audio_summary">Fix for silent video audio on SM6150/Snapdragon 675 devices (e.g., Motorola One Zoom). Overrides Camcorder/Default/Unprocessed audio sources to avoid broken 24-bit PCM capture in DSP firmware. Auto-enabled on SM6150 devices.</string>
+    <string name="sm6150_audio_warning">Warning: This audio source may produce silent video on your SM6150 device unless \"Force 16-bit audio\" is enabled.</string>
+    <string name="sm6150_audio_source_note">SM6150 detected: Camcorder, Default, and Unprocessed sources may produce silent audio unless \"Force 16-bit audio\" is enabled.</string>
 
     <string name="preference_video_bitrate_default">Default</string>
     <string name="preference_video_bitrate_100000">100kbps</string>

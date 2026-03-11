@@ -192,6 +192,28 @@ public class PreferenceSubVideo extends PreferenceSubScreen {
                 pref.setEntries(R.array.preference_record_audio_src_entries_preandroid7);
                 pref.setEntryValues(R.array.preference_record_audio_src_values_preandroid7);
             }
+
+            // On SM6150 devices, warn when selecting audio sources known to produce silent audio
+            if( MyApplicationInterface.isSM6150Device() ) {
+                pref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                    @Override
+                    public boolean onPreferenceChange(Preference preference, Object newValue) {
+                        String value = newValue.toString();
+                        boolean force_16bit = sharedPreferences.getBoolean(PreferenceKeys.Force16BitAudioPreferenceKey, true);
+                        if( !force_16bit && (value.equals("audio_src_camcorder") || value.equals("audio_src_default") || value.equals("audio_src_unprocessed")) ) {
+                            android.widget.Toast.makeText(getActivity(),
+                                R.string.sm6150_audio_warning,
+                                android.widget.Toast.LENGTH_LONG).show();
+                        }
+                        return true;
+                    }
+                });
+
+                // also update the summary to mention SM6150 issue
+                String current_summary = getString(R.string.preference_record_audio_src_summary);
+                String sm6150_note = getString(R.string.sm6150_audio_source_note);
+                pref.setSummary(String.format(current_summary, sm6150_note));
+            }
         }
 
         // Set Force 16-bit audio default based on SM6150 detection
