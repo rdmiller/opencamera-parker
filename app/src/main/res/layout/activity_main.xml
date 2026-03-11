@@ -124,6 +124,54 @@
         android:background="@color/seekbar_background"
         />
 
+    <LinearLayout
+        android:id="@+id/zoom_presets_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        >
+        <Button
+            android:id="@+id/zoom_preset_wide"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:text="@string/zoom_preset_wide"
+            android:textSize="11sp"
+            android:textColor="@android:color/white"
+            android:background="@drawable/circle_background"
+            android:backgroundTint="@color/icons_background_tint"
+            android:backgroundTintMode="src_in"
+            android:onClick="clickedZoomPresetWide"
+            android:padding="0dp"
+            />
+        <Button
+            android:id="@+id/zoom_preset_1x"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:text="@string/zoom_preset_1x"
+            android:textSize="11sp"
+            android:textColor="@android:color/white"
+            android:background="@drawable/circle_background"
+            android:backgroundTint="@color/icons_background_tint"
+            android:backgroundTintMode="src_in"
+            android:onClick="clickedZoomPreset1x"
+            android:padding="0dp"
+            />
+        <Button
+            android:id="@+id/zoom_preset_tele"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:text="@string/zoom_preset_tele"
+            android:textSize="11sp"
+            android:textColor="@android:color/white"
+            android:background="@drawable/circle_background"
+            android:backgroundTint="@color/icons_background_tint"
+            android:backgroundTintMode="src_in"
+            android:onClick="clickedZoomPresetTele"
+            android:padding="0dp"
+            />
+    </LinearLayout>
+
     <!-- n.b., layout_marginLeft set programmatically in DrawPreview -->
     <SeekBar
         android:id="@+id/focus_seekbar"

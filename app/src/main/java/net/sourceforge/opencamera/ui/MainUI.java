@@ -714,6 +714,22 @@ public class MainUI {
             int margin = (int) (20 * scale + 0.5f); // convert dps to pixels
             setFixedRotation(main_activity.findViewById(R.id.zoom_seekbar), 0, navigation_gap_reverse_landscape_align_parent_bottom, margin+navigation_gap, navigation_gap_landscape_align_parent_bottom);
 
+            // position zoom presets above the zoom seekbar
+            view = main_activity.findViewById(R.id.zoom_presets_container);
+            layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
+            layoutParams.addRule(above, R.id.zoom_seekbar);
+            layoutParams.addRule(below, 0);
+            layoutParams.addRule(align_parent_left, 0);
+            layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);
+            layoutParams.addRule(align_parent_top, 0);
+            layoutParams.addRule(align_parent_bottom, 0);
+            layoutParams.addRule(left_of, 0);
+            layoutParams.addRule(right_of, 0);
+            int preset_margin = (int) (8 * scale + 0.5f);
+            layoutParams.setMargins(0, 0, preset_margin + navigation_gap, 0);
+            view.setLayoutParams(layoutParams);
+            setViewRotation(view, ui_rotation);
+
             view = main_activity.findViewById(R.id.focus_seekbar);
             layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
             layoutParams.addRule(left_of, R.id.zoom_seekbar);
@@ -1377,6 +1393,16 @@ public class MainUI {
                 }
                 if( main_activity.getPreview().supportsZoom() && sharedPreferences.getBoolean(PreferenceKeys.ShowZoomSliderControlsPreferenceKey, true) ) {
                     zoomSeekBar.setVisibility(visibility);
+                }
+                // Show zoom preset buttons when device has multi-camera zoom (min zoom < 1x)
+                {
+                    View zoomPresetsContainer = main_activity.findViewById(R.id.zoom_presets_container);
+                    if( main_activity.getPreview().supportsZoom() && main_activity.getPreview().getMinZoomRatio() < 100 ) {
+                        zoomPresetsContainer.setVisibility(visibility);
+                    }
+                    else {
+                        zoomPresetsContainer.setVisibility(View.GONE);
+                    }
                 }
                 if( main_activity.showManualFocusSeekbar(false) )
                     focusSeekBar.setVisibility(visibility);

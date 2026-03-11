@@ -65,6 +65,9 @@
     <string name="failed_to_open_camera_3">BY ANOTHER APPLICATION?</string>
     <string name="iso">ISO</string>
     <string name="zoom">Zoom</string>
+    <string name="zoom_preset_wide">.6x</string>
+    <string name="zoom_preset_1x">1x</string>
+    <string name="zoom_preset_tele">3x</string>
     <string name="free_memory">Free</string>
     <string name="screen_lock_message_1">[LOCKED:</string>
     <string name="screen_lock_message_2">Swipe to unlock]</string>

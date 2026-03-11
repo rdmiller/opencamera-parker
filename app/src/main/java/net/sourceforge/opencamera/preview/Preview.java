@@ -2382,6 +2382,51 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         return 0; // shouldn't happen but just in case, choose smallest zoom value
     }
 
+    /** Finds the zoom index closest to the given zoom ratio (scaled by 100, e.g., 300 = 3x).
+     *  Returns -1 if zoom is not supported or the ratio is out of range.
+     */
+    public int findZoomIndexForRatio(int target_ratio) {
+        if( !has_zoom || zoom_ratios == null || zoom_ratios.isEmpty() )
+            return -1;
+        int best_index = -1;
+        int best_diff = Integer.MAX_VALUE;
+        for(int i=0;i<zoom_ratios.size();i++) {
+            int diff = Math.abs(zoom_ratios.get(i) - target_ratio);
+            if( diff < best_diff ) {
+                best_diff = diff;
+                best_index = i;
+            }
+        }
+        return best_index;
+    }
+
+    /** Returns the current zoom ratio (scaled by 100), or -1 if zoom not supported.
+     */
+    public int getCurrentZoomRatio() {
+        if( !has_zoom || zoom_ratios == null || camera_controller == null )
+            return -1;
+        int zoom_index = camera_controller.getZoom();
+        if( zoom_index >= 0 && zoom_index < zoom_ratios.size() )
+            return zoom_ratios.get(zoom_index);
+        return -1;
+    }
+
+    /** Returns the minimum zoom ratio (scaled by 100), or 100 if zoom not supported.
+     */
+    public int getMinZoomRatio() {
+        if( !has_zoom || zoom_ratios == null || zoom_ratios.isEmpty() )
+            return 100;
+        return zoom_ratios.get(0);
+    }
+
+    /** Returns the maximum zoom ratio (scaled by 100), or 100 if zoom not supported.
+     */
+    public int getMaxZoomRatio() {
+        if( !has_zoom || zoom_ratios == null || zoom_ratios.isEmpty() )
+            return 100;
+        return zoom_ratios.get(zoom_ratios.size()-1);
+    }
+
     public void setupBurstMode() {
         if( MyDebug.LOG )
             Log.d(TAG, "setupBurstMode()");

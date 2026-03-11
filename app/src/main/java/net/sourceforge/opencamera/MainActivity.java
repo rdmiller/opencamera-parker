@@ -2746,6 +2746,34 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
             Log.d(TAG, "clickedSwitchMultiCamera: total time: " + (System.currentTimeMillis() - debug_time));
     }
 
+    /** Zoom to ultra-wide preset (~0.6x). */
+    public void clickedZoomPresetWide(View view) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "clickedZoomPresetWide");
+        zoomToPresetRatio(60);
+    }
+
+    /** Zoom to 1x preset. */
+    public void clickedZoomPreset1x(View view) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "clickedZoomPreset1x");
+        zoomToPresetRatio(100);
+    }
+
+    /** Zoom to telephoto preset (~3x). */
+    public void clickedZoomPresetTele(View view) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "clickedZoomPresetTele");
+        zoomToPresetRatio(300);
+    }
+
+    private void zoomToPresetRatio(int ratio) {
+        int zoom_index = preview.findZoomIndexForRatio(ratio);
+        if( zoom_index >= 0 ) {
+            preview.zoomTo(zoom_index, false, true);
+        }
+    }
+
     /**
      * Toggles Photo/Video mode
      */
