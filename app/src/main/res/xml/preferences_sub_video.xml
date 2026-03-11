@@ -108,6 +108,13 @@
         />
 
     <SwitchPreference
+        android:key="preference_force_16bit_audio"
+        android:title="@string/preference_force_16bit_audio"
+        android:summary="@string/preference_force_16bit_audio_summary"
+        android:dependency="preference_record_audio"
+        />
+
+    <SwitchPreference
         android:key="preference_lock_video"
         android:title="@string/preference_lock_video"
         android:summary="@string/preference_lock_video_summary"

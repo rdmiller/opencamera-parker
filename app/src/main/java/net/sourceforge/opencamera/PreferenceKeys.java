@@ -383,4 +383,8 @@ public class PreferenceKeys {
 
     public static final String ImmersiveModePreferenceKey = "preference_immersive_mode";
     public static final String AddYPRToComments="preference_comment_ypr";
+
+    public static final String Force16BitAudioPreferenceKey = "preference_force_16bit_audio";
+
+    public static final String VideoStabilizationModePreferenceKey = "preference_video_stabilization_mode";
 }

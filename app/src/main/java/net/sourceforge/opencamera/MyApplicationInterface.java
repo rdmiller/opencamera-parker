@@ -1258,7 +1258,30 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public String getRecordAudioSourcePref() {
+        // SM6150 (Snapdragon 675) has broken 24-bit PCM audio capture in DSP firmware.
+        // When force 16-bit audio is enabled, override to voice_recognition which negotiates
+        // 16-bit PCM, avoiding silent audio in video recording.
+        if( sharedPreferences.getBoolean(PreferenceKeys.Force16BitAudioPreferenceKey, isSM6150Device()) ) {
+            String pref = sharedPreferences.getString(PreferenceKeys.RecordAudioSourcePreferenceKey, "audio_src_camcorder");
+            // Only override sources that trigger 24-bit negotiation
+            if( pref.equals("audio_src_camcorder") || pref.equals("audio_src_default") || pref.equals("audio_src_unprocessed") ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "Force 16-bit audio: overriding audio source from " + pref + " to audio_src_voice_recognition");
+                return "audio_src_voice_recognition";
+            }
+            return pref;
+        }
         return sharedPreferences.getString(PreferenceKeys.RecordAudioSourcePreferenceKey, "audio_src_camcorder");
+    }
+
+    /** Detects SM6150 (Snapdragon 675) platform, known to have broken 24-bit PCM audio capture.
+     *  Also affects other SM6150-based devices like Motorola One Action, One Vision, etc.
+     */
+    public static boolean isSM6150Device() {
+        String hardware = Build.HARDWARE != null ? Build.HARDWARE.toLowerCase() : "";
+        String board = Build.BOARD != null ? Build.BOARD.toLowerCase() : "";
+        return hardware.contains("sm6150") || board.contains("sm6150") ||
+               hardware.contains("trinket") || board.contains("trinket"); // trinket is Qualcomm's codename for SM6150
     }
 
     public boolean getFocusPeakingPref() {

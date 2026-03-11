@@ -179,6 +179,17 @@ public class PreferenceSubVideo extends PreferenceSubScreen {
             }
         }
 
+        // Set Force 16-bit audio default based on SM6150 detection
+        {
+            android.preference.SwitchPreference pref = (android.preference.SwitchPreference)findPreference(PreferenceKeys.Force16BitAudioPreferenceKey);
+            if( pref != null && !sharedPreferences.contains(PreferenceKeys.Force16BitAudioPreferenceKey) ) {
+                boolean is_sm6150 = MyApplicationInterface.isSM6150Device();
+                pref.setChecked(is_sm6150);
+                if( MyDebug.LOG )
+                    Log.d(TAG, "Force 16-bit audio default: " + is_sm6150 + " (SM6150 detected: " + is_sm6150 + ")");
+            }
+        }
+
         setupDependencies();
 
         if( MyDebug.LOG )
