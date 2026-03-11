@@ -1397,7 +1397,7 @@ public class MainUI {
                 // Show zoom preset buttons when device has multi-camera zoom (min zoom < 1x)
                 {
                     View zoomPresetsContainer = main_activity.findViewById(R.id.zoom_presets_container);
-                    if( main_activity.getPreview().supportsZoom() && main_activity.getPreview().getMinZoomRatio() < 100 ) {
+                    if( main_activity.getPreview().supportsZoom() && main_activity.getPreview().getMinZoomRatio100() < 100 ) {
                         zoomPresetsContainer.setVisibility(visibility);
                     }
                     else {

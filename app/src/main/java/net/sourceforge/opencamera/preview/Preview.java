@@ -2413,7 +2413,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
     /** Returns the minimum zoom ratio (scaled by 100), or 100 if zoom not supported.
      */
-    public int getMinZoomRatio() {
+    public int getMinZoomRatio100() {
         if( !has_zoom || zoom_ratios == null || zoom_ratios.isEmpty() )
             return 100;
         return zoom_ratios.get(0);
@@ -2421,7 +2421,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
 
     /** Returns the maximum zoom ratio (scaled by 100), or 100 if zoom not supported.
      */
-    public int getMaxZoomRatio() {
+    public int getMaxZoomRatio100() {
         if( !has_zoom || zoom_ratios == null || zoom_ratios.isEmpty() )
             return 100;
         return zoom_ratios.get(zoom_ratios.size()-1);
