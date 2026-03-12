@@ -443,7 +443,13 @@ public class MyApplicationInterface extends BasicApplicationInterface {
                 return "focus_mode_manual2";
             }
         }
-        return sharedPreferences.getString(PreferenceKeys.getFocusPreferenceKey(cameraId, is_video), "");
+        String value = sharedPreferences.getString(PreferenceKeys.getFocusPreferenceKey(cameraId, is_video), "");
+        // On parker telephoto (camera 4), default to continuous picture AF for more reliable focusing
+        // on the narrow-FoV lens — only when user hasn't set an explicit preference
+        if( value.isEmpty() && !is_video && isParkerDevice() && cameraId == 4 ) {
+            return "focus_mode_continuous_picture";
+        }
+        return value;
     }
 
     int getFocusAssistPref() {
@@ -500,7 +506,15 @@ public class MyApplicationInterface extends BasicApplicationInterface {
 
     @Override
     public String getCameraNoiseReductionModePref() {
-        return sharedPreferences.getString(PreferenceKeys.CameraNoiseReductionModePreferenceKey, CameraController.NOISE_REDUCTION_MODE_DEFAULT);
+        String value = sharedPreferences.getString(PreferenceKeys.CameraNoiseReductionModePreferenceKey, CameraController.NOISE_REDUCTION_MODE_DEFAULT);
+        if( value.equals(CameraController.NOISE_REDUCTION_MODE_DEFAULT) && isParkerDevice() ) {
+            // On parker, use HIGH_QUALITY noise reduction for the smaller-sensor lenses
+            // (camera 3 = ultra-wide, camera 4 = telephoto) to compensate for higher noise
+            if( cameraId == 3 || cameraId == 4 ) {
+                return "high_quality";
+            }
+        }
+        return value;
     }
 
     @Override
@@ -658,6 +672,11 @@ public class MyApplicationInterface extends BasicApplicationInterface {
             if( MyDebug.LOG )
                 Log.e(TAG, "image_quality_s invalid format: " + image_quality_s);
             image_quality = 90;
+        }
+        // On parker camera 0, bump quality to 95 when the user hasn't changed it from the default.
+        // The binned 12MP output is small enough that the higher quality has negligible file size impact.
+        if( isParkerDevice() && cameraId == 0 && image_quality == 90 ) {
+            image_quality = 95;
         }
         if( isRawOnly() ) {
             // if raw only mode, we can set a lower quality for the JPEG, as it isn't going to be saved - only used for
