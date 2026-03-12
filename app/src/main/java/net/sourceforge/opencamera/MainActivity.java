@@ -2773,6 +2773,7 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
         if( MyDebug.LOG )
             Log.d(TAG, "clickedZoomPresetWide");
         if( parker_camera_ids != null ) {
+            setZoomPresetHighlight(0);
             switchToParkerCamera(parker_camera_ids[0]); // ultra-wide
         }
         else {
@@ -2785,6 +2786,7 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
         if( MyDebug.LOG )
             Log.d(TAG, "clickedZoomPreset1x");
         if( parker_camera_ids != null ) {
+            setZoomPresetHighlight(1);
             switchToParkerCamera(parker_camera_ids[1]); // composite (main+tele)
         }
         else {
@@ -2797,6 +2799,7 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
         if( MyDebug.LOG )
             Log.d(TAG, "clickedZoomPresetTele");
         if( parker_camera_ids != null ) {
+            setZoomPresetHighlight(2);
             // switch to composite camera and zoom to 3x (triggers telephoto)
             int target_camera = parker_camera_ids[1]; // composite
             int current_camera = getActualCameraId();
@@ -2811,7 +2814,6 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
                 if( zoom_index >= 0 ) {
                     preview.zoomTo(zoom_index, false, true);
                 }
-                updateZoomPresetHighlight();
             }
         }
         else {
@@ -2826,7 +2828,6 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
             int zoom_index = preview.findZoomIndexForRatio(100);
             if( zoom_index >= 0 )
                 preview.zoomTo(zoom_index, false, true);
-            updateZoomPresetHighlight();
             return;
         }
         this.closePopup();
@@ -2866,25 +2867,31 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
         if( parker_camera_ids == null )
             return;
         int current = getActualCameraId();
+        // On the composite camera, check zoom level to distinguish 1x from 3x
+        int active;
+        if( current == parker_camera_ids[0] ) {
+            active = 0; // wide
+        }
+        else if( current == parker_camera_ids[1] ) {
+            int zoom_ratio = preview.getCurrentZoomRatio();
+            active = (zoom_ratio >= 250) ? 2 : 1; // 2.5x+ = tele, else 1x
+        }
+        else {
+            active = 1; // default to 1x
+        }
+        setZoomPresetHighlight(active);
+    }
+
+    /** Directly highlight a preset button: 0=wide, 1=1x, 2=tele. */
+    private void setZoomPresetHighlight(int active) {
         Button wide = findViewById(R.id.zoom_preset_wide);
         Button one = findViewById(R.id.zoom_preset_1x);
         Button tele = findViewById(R.id.zoom_preset_tele);
         float alpha_active = 1.0f;
         float alpha_inactive = 0.4f;
-
-        // On the composite camera, check zoom level to distinguish 1x from 3x
-        boolean is_wide = (current == parker_camera_ids[0]);
-        boolean is_tele = false;
-        boolean is_1x = false;
-        if( current == parker_camera_ids[1] ) {
-            int zoom_ratio = preview.getCurrentZoomRatio();
-            is_tele = (zoom_ratio >= 250); // 2.5x or above = telephoto
-            is_1x = !is_tele;
-        }
-
-        wide.setAlpha(is_wide ? alpha_active : alpha_inactive);
-        one.setAlpha(is_1x ? alpha_active : alpha_inactive);
-        tele.setAlpha(is_tele ? alpha_active : alpha_inactive);
+        wide.setAlpha(active == 0 ? alpha_active : alpha_inactive);
+        one.setAlpha(active == 1 ? alpha_active : alpha_inactive);
+        tele.setAlpha(active == 2 ? alpha_active : alpha_inactive);
     }
 
     /**
