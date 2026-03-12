@@ -1532,6 +1532,15 @@ public class MainUI {
                 }
                 popupButton.setVisibility(main_activity.getPreview().supportsFlash() ? visibility_video : visibility); // still allow popup in order to change flash mode when recording video
 
+                // Show zoom/camera preset buttons
+                {
+                    View zoomPresetsContainer = main_activity.findViewById(R.id.zoom_presets_container);
+                    if( main_activity.hasParkerCameraPresets() ||
+                        (main_activity.getPreview().supportsZoom() && main_activity.getPreview().getMinZoomRatio100() < 100) ) {
+                        zoomPresetsContainer.setVisibility(visibility);
+                    }
+                }
+
                 if( show_gui_photo && show_gui_video ) {
                     layoutUI(); // needed for "top" UIPlacement, to auto-arrange the buttons
                 }
