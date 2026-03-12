@@ -2851,7 +2851,8 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
 
     private void syncZoomSeekbar(int zoom_index) {
         SeekBar zoomSeekBar = findViewById(R.id.zoom_seekbar);
-        zoomSeekBar.setProgress(zoomIndexToProgress(zoom_index));
+        if( zoomSeekBar != null )
+            zoomSeekBar.setProgress(zoomIndexToProgress(zoom_index));
     }
 
     /** Number of virtual seekbar steps for parker's log-scale zoom bar. */
