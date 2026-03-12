@@ -730,6 +730,10 @@ public class MainUI {
             layoutParams.setMargins(0, 0, 0, preset_margin + navigation_gap);
             view.setLayoutParams(layoutParams);
             setViewRotation(view, ui_rotation);
+            // in portrait, stack buttons vertically so they don't span the narrow dimension
+            if( view instanceof LinearLayout ) {
+                ((LinearLayout) view).setOrientation(system_orientation_portrait ? LinearLayout.VERTICAL : LinearLayout.HORIZONTAL);
+            }
 
             view = main_activity.findViewById(R.id.focus_seekbar);
             layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();

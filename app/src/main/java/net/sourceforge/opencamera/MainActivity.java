@@ -2808,6 +2808,7 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
             if( zoom_index >= 0 ) {
                 preview.zoomTo(zoom_index, false, true);
             }
+            updateZoomPresetHighlight();
         }
         else {
             zoomToPresetRatio(300);
@@ -2821,6 +2822,7 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
             int zoom_index = preview.findZoomIndexForRatio(100);
             if( zoom_index >= 0 )
                 preview.zoomTo(zoom_index, false, true);
+            updateZoomPresetHighlight();
             return;
         }
         this.closePopup();
@@ -2862,9 +2864,20 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
         Button tele = findViewById(R.id.zoom_preset_tele);
         float alpha_active = 1.0f;
         float alpha_inactive = 0.4f;
-        wide.setAlpha(current == parker_camera_ids[0] ? alpha_active : alpha_inactive);
-        one.setAlpha(current == parker_camera_ids[1] ? alpha_active : alpha_inactive);
-        tele.setAlpha(current == parker_camera_ids[2] ? alpha_active : alpha_inactive);
+
+        // On the composite camera, check zoom level to distinguish 1x from 3x
+        boolean is_wide = (current == parker_camera_ids[0]);
+        boolean is_tele = false;
+        boolean is_1x = false;
+        if( current == parker_camera_ids[1] ) {
+            int zoom_ratio = preview.getCurrentZoomRatio();
+            is_tele = (zoom_ratio >= 250); // 2.5x or above = telephoto
+            is_1x = !is_tele;
+        }
+
+        wide.setAlpha(is_wide ? alpha_active : alpha_inactive);
+        one.setAlpha(is_1x ? alpha_active : alpha_inactive);
+        tele.setAlpha(is_tele ? alpha_active : alpha_inactive);
     }
 
     /**
