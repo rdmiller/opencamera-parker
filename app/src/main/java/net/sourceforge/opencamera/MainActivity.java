@@ -1436,26 +1436,41 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
         if( MyDebug.LOG )
             Log.d(TAG, "zoomByStep: " + change);
         if( preview.supportsZoom() && change != 0 ) {
-            if( preview.getCameraController() != null ) {
-                // If the minimum zoom is < 1.0, the seekbar will have repeated entries for 1x zoom
-                // (so it's easier for the user to zoom to exactly 1.0x). But if using the -/+ buttons,
-                // volume keys etc to zoom, we want to skip over these repeated values.
-                int zoom_factor = preview.getCameraController().getZoom();
-                int new_zoom_factor = zoom_factor + change;
-                if( MyDebug.LOG )
-                    Log.d(TAG, "new_zoom_factor: " + new_zoom_factor);
-                while( new_zoom_factor > 0 && new_zoom_factor < preview.getMaxZoom() && preview.getZoomRatio(new_zoom_factor) == preview.getZoomRatio() ) {
-                    if( change > 0 )
-                        change++;
-                    else
-                        change--;
-                    new_zoom_factor = zoom_factor + change;
-                    if( MyDebug.LOG )
-                        Log.d(TAG, "skip over constant region: " + new_zoom_factor);
-                }
+            if( hasParkerCameraPresets() ) {
+                // With log-scale seekbar, step in seekbar-progress space and skip positions
+                // that map to the same zoom index for responsive feel
+                SeekBar zoomSeekBar = findViewById(R.id.zoom_seekbar);
+                int progress = zoomSeekBar.getProgress();
+                int currentIndex = progressToZoomIndex(progress);
+                int newProgress = progress;
+                do {
+                    newProgress -= change; // change > 0 = zoom in = decrease progress
+                } while( newProgress > 0 && newProgress < PARKER_ZOOM_STEPS &&
+                         progressToZoomIndex(newProgress) == currentIndex );
+                newProgress = Math.max(0, Math.min(PARKER_ZOOM_STEPS, newProgress));
+                zoomSeekBar.setProgress(newProgress);
             }
-
-            mainUI.changeSeekbar(R.id.zoom_seekbar, -change); // seekbar is opposite direction to zoom array
+            else {
+                if( preview.getCameraController() != null ) {
+                    // If the minimum zoom is < 1.0, the seekbar will have repeated entries for 1x zoom
+                    // (so it's easier for the user to zoom to exactly 1.0x). But if using the -/+ buttons,
+                    // volume keys etc to zoom, we want to skip over these repeated values.
+                    int zoom_factor = preview.getCameraController().getZoom();
+                    int new_zoom_factor = zoom_factor + change;
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "new_zoom_factor: " + new_zoom_factor);
+                    while( new_zoom_factor > 0 && new_zoom_factor < preview.getMaxZoom() && preview.getZoomRatio(new_zoom_factor) == preview.getZoomRatio() ) {
+                        if( change > 0 )
+                            change++;
+                        else
+                            change--;
+                        new_zoom_factor = zoom_factor + change;
+                        if( MyDebug.LOG )
+                            Log.d(TAG, "skip over constant region: " + new_zoom_factor);
+                    }
+                }
+                mainUI.changeSeekbar(R.id.zoom_seekbar, -change); // seekbar is opposite direction to zoom array
+            }
         }
     }
 
@@ -2831,7 +2846,51 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
 
     private void syncZoomSeekbar(int zoom_index) {
         SeekBar zoomSeekBar = findViewById(R.id.zoom_seekbar);
-        zoomSeekBar.setProgress(preview.getMaxZoom() - zoom_index);
+        zoomSeekBar.setProgress(zoomIndexToProgress(zoom_index));
+    }
+
+    /** Number of virtual seekbar steps for parker's log-scale zoom bar. */
+    private static final int PARKER_ZOOM_STEPS = 300;
+
+    /** Returns the seekbar max for the current camera. */
+    int getZoomSeekbarMax() {
+        if( hasParkerCameraPresets() ) {
+            return PARKER_ZOOM_STEPS;
+        }
+        return preview.getMaxZoom();
+    }
+
+    /** Convert zoom index to seekbar progress. Log-scale on parker, linear otherwise.
+     *  Progress 0 = max zoom, progress max = min zoom. */
+    public int zoomIndexToProgress(int zoomIndex) {
+        if( !hasParkerCameraPresets() || preview.getMaxZoom() <= 0 ) {
+            return preview.getMaxZoom() - zoomIndex;
+        }
+        float ratio = preview.getZoomRatio(zoomIndex);
+        float minRatio = preview.getZoomRatio(0);
+        float maxRatio = preview.getZoomRatio(preview.getMaxZoom());
+        if( maxRatio <= minRatio ) {
+            return PARKER_ZOOM_STEPS;
+        }
+        // t = ln(maxRatio/ratio) / ln(maxRatio/minRatio), in [0,1]
+        float t = (float)(Math.log(maxRatio / ratio) / Math.log(maxRatio / minRatio));
+        return Math.max(0, Math.min(PARKER_ZOOM_STEPS, Math.round(t * PARKER_ZOOM_STEPS)));
+    }
+
+    /** Convert seekbar progress to zoom index. Log-scale on parker, linear otherwise. */
+    int progressToZoomIndex(int progress) {
+        if( !hasParkerCameraPresets() || preview.getMaxZoom() <= 0 ) {
+            return preview.getMaxZoom() - progress;
+        }
+        float t = (float)progress / PARKER_ZOOM_STEPS; // 0 (max zoom) to 1 (min zoom)
+        float minRatio = preview.getZoomRatio(0);
+        float maxRatio = preview.getZoomRatio(preview.getMaxZoom());
+        if( maxRatio <= minRatio ) {
+            return 0;
+        }
+        // ratio = maxRatio * (minRatio/maxRatio)^t
+        float ratio = maxRatio * (float)Math.pow(minRatio / maxRatio, t);
+        return preview.findZoomIndexForRatio(Math.round(ratio * 100));
     }
 
     private void switchToParkerCamera(int cameraId) {
@@ -6023,8 +6082,8 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
 
             if( preview.supportsZoom() ) {
                 zoomSeekBar.setOnSeekBarChangeListener(null); // clear an existing listener - don't want to call the listener when setting up the progress bar to match the existing state
-                zoomSeekBar.setMax(preview.getMaxZoom());
-                zoomSeekBar.setProgress(preview.getMaxZoom()-preview.getCameraController().getZoom());
+                zoomSeekBar.setMax(getZoomSeekbarMax());
+                zoomSeekBar.setProgress(zoomIndexToProgress(preview.getCameraController().getZoom()));
                 zoomSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
                     private long last_haptic_time;
 
@@ -6036,7 +6095,7 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
                         // indirectly set zoom via this method, from setting the zoom slider
                         // if hasSmoothZoom()==true, then the preview already handled zooming to the current value
                         if( !preview.hasSmoothZoom() ) {
-                            int new_zoom_factor = preview.getMaxZoom() - progress;
+                            int new_zoom_factor = progressToZoomIndex(progress);
                             if( fromUser && preview.getCameraController() != null ) {
                                 float old_zoom_ratio = preview.getZoomRatio();
                                 float new_zoom_ratio = preview.getZoomRatio(new_zoom_factor);
@@ -6280,7 +6339,7 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
                 preview.zoomTo(zoom_index, false, false);
                 // sync the seekbar position
                 SeekBar zoomSeekBar = findViewById(R.id.zoom_seekbar);
-                zoomSeekBar.setProgress(preview.getMaxZoom() - zoom_index);
+                zoomSeekBar.setProgress(zoomIndexToProgress(zoom_index));
             }
             pending_zoom_after_switch = -1;
         }

@@ -2363,7 +2363,7 @@ public class MainUI {
         SeekBar zoomSeekBar = main_activity.findViewById(R.id.zoom_seekbar);
         if( MyDebug.LOG )
             Log.d(TAG, "progress was: " + zoomSeekBar.getProgress());
-        zoomSeekBar.setProgress(main_activity.getPreview().getMaxZoom()-new_zoom);
+        zoomSeekBar.setProgress(main_activity.zoomIndexToProgress(new_zoom));
         if( MyDebug.LOG )
             Log.d(TAG, "progress is now: " + zoomSeekBar.getProgress());
     }
