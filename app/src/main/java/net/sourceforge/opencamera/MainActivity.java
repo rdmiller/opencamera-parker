@@ -2934,7 +2934,7 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
             return false; // debounce
         int current = getActualCameraId();
         int zoom = camera_controller.getZoom();
-        if( current == parker_camera_ids[1] && zoom == 0 ) {
+        if( current == parker_camera_ids[1] && zoom <= 0 ) {
             // On composite at minimum zoom → switch to ultra-wide
             last_auto_lens_switch_time = now;
             setZoomPresetHighlight(0);
@@ -2942,7 +2942,7 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
             userSwitchToCamera(parker_camera_ids[0], null);
             return true;
         }
-        else if( current == parker_camera_ids[0] && zoom == preview.getMaxZoom() ) {
+        else if( current == parker_camera_ids[0] && zoom >= preview.getMaxZoom() ) {
             // On ultra-wide at maximum zoom → switch to composite at 1x
             last_auto_lens_switch_time = now;
             setZoomPresetHighlight(1);
