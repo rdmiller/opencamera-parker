@@ -1098,19 +1098,10 @@ public class CameraController2 extends CameraController {
                         if( video_stabilization && keep_ois_with_eis )
                             Log.d(TAG, "note: hybrid stabilization mode overridden by OIS toggle");
                     }
-                    if( default_optical_stabilization == null ) {
-                        default_optical_stabilization = builder.get(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE);
-                    }
                     builder.set(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE, CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE_OFF);
                 }
                 else if( video_stabilization && !keep_ois_with_eis ) {
                     // EIS only: disable OIS to avoid conflicts (original behavior)
-                    if( default_optical_stabilization == null ) {
-                        // save the default optical_stabilization
-                        default_optical_stabilization = builder.get(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE);
-                        if( MyDebug.LOG )
-                            Log.d(TAG, "default_optical_stabilization: " + default_optical_stabilization);
-                    }
                     builder.set(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE, CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE_OFF);
                 }
                 else if( video_stabilization && keep_ois_with_eis ) {
@@ -3530,6 +3521,12 @@ public class CameraController2 extends CameraController {
         if( MyDebug.LOG )
             Log.d(TAG, "is_optical_stabilization_supported: " + camera_features.is_optical_stabilization_supported);
         supports_optical_stabilization = camera_features.is_optical_stabilization_supported;
+        // Capture the HAL's default OIS mode eagerly so we can restore it later
+        if( supports_optical_stabilization ) {
+            camera_settings.default_optical_stabilization = previewBuilder.get(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE);
+            if( MyDebug.LOG )
+                Log.d(TAG, "default_optical_stabilization: " + camera_settings.default_optical_stabilization);
+        }
 
         camera_features.is_video_stabilization_supported = false;
         int [] supported_video_stabilization_modes = characteristics.get(CameraCharacteristics.CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES);
