@@ -103,6 +103,7 @@ import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
@@ -2767,25 +2768,63 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
             Log.d(TAG, "clickedSwitchMultiCamera: total time: " + (System.currentTimeMillis() - debug_time));
     }
 
-    /** Zoom to ultra-wide preset (~0.6x). */
+    /** Switch to ultra-wide camera or zoom to 0.6x. */
     public void clickedZoomPresetWide(View view) {
         if( MyDebug.LOG )
             Log.d(TAG, "clickedZoomPresetWide");
-        zoomToPresetRatio(60);
+        if( parker_camera_ids != null ) {
+            switchToParkerCamera(parker_camera_ids[0]); // ultra-wide
+        }
+        else {
+            zoomToPresetRatio(60);
+        }
     }
 
-    /** Zoom to 1x preset. */
+    /** Switch to main camera or zoom to 1x. */
     public void clickedZoomPreset1x(View view) {
         if( MyDebug.LOG )
             Log.d(TAG, "clickedZoomPreset1x");
-        zoomToPresetRatio(100);
+        if( parker_camera_ids != null ) {
+            switchToParkerCamera(parker_camera_ids[1]); // composite (main+tele)
+        }
+        else {
+            zoomToPresetRatio(100);
+        }
     }
 
-    /** Zoom to telephoto preset (~3x). */
+    /** Switch to telephoto camera or zoom to 3x. */
     public void clickedZoomPresetTele(View view) {
         if( MyDebug.LOG )
             Log.d(TAG, "clickedZoomPresetTele");
-        zoomToPresetRatio(300);
+        if( parker_camera_ids != null ) {
+            // switch to composite camera and zoom to 3x (triggers telephoto)
+            int target_camera = parker_camera_ids[1]; // composite
+            int current_camera = getActualCameraId();
+            if( current_camera != target_camera ) {
+                switchToParkerCamera(target_camera);
+            }
+            // zoom to 3x on the composite camera
+            int zoom_index = preview.findZoomIndexForRatio(300);
+            if( zoom_index >= 0 ) {
+                preview.zoomTo(zoom_index, false, true);
+            }
+        }
+        else {
+            zoomToPresetRatio(300);
+        }
+    }
+
+    private void switchToParkerCamera(int cameraId) {
+        int current = getActualCameraId();
+        if( current == cameraId ) {
+            // already on this camera, reset zoom to 1x
+            int zoom_index = preview.findZoomIndexForRatio(100);
+            if( zoom_index >= 0 )
+                preview.zoomTo(zoom_index, false, true);
+            return;
+        }
+        this.closePopup();
+        userSwitchToCamera(cameraId, null);
     }
 
     private void zoomToPresetRatio(int ratio) {
@@ -2793,6 +2832,39 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
         if( zoom_index >= 0 ) {
             preview.zoomTo(zoom_index, false, true);
         }
+    }
+
+    /** Camera IDs for Moto One Zoom preset buttons: [ultra-wide, composite, telephoto].
+     *  null on non-parker devices.
+     */
+    private static final int[] parker_camera_ids;
+    static {
+        if( "motorola".equalsIgnoreCase(Build.MANUFACTURER) && "motorola one zoom".equalsIgnoreCase(Build.MODEL) ) {
+            parker_camera_ids = new int[]{ 3, 7, 4 };
+        }
+        else {
+            parker_camera_ids = null;
+        }
+    }
+
+    /** Returns true if this device has parker-specific camera presets. */
+    public boolean hasParkerCameraPresets() {
+        return parker_camera_ids != null;
+    }
+
+    /** Updates the zoom preset buttons to highlight the active camera/zoom. */
+    public void updateZoomPresetHighlight() {
+        if( parker_camera_ids == null )
+            return;
+        int current = getActualCameraId();
+        Button wide = findViewById(R.id.zoom_preset_wide);
+        Button one = findViewById(R.id.zoom_preset_1x);
+        Button tele = findViewById(R.id.zoom_preset_tele);
+        float alpha_active = 1.0f;
+        float alpha_inactive = 0.4f;
+        wide.setAlpha(current == parker_camera_ids[0] ? alpha_active : alpha_inactive);
+        one.setAlpha(current == parker_camera_ids[1] ? alpha_active : alpha_inactive);
+        tele.setAlpha(current == parker_camera_ids[2] ? alpha_active : alpha_inactive);
     }
 
     /**
@@ -6157,6 +6229,7 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
 
         mainUI.setTakePhotoIcon();
         mainUI.setSwitchCameraContentDescription();
+        updateZoomPresetHighlight();
         if( MyDebug.LOG )
             Log.d(TAG, "cameraSetup: time after setting take photo icon: " + (System.currentTimeMillis() - debug_time));
 

@@ -1394,10 +1394,11 @@ public class MainUI {
                 if( main_activity.getPreview().supportsZoom() && sharedPreferences.getBoolean(PreferenceKeys.ShowZoomSliderControlsPreferenceKey, true) ) {
                     zoomSeekBar.setVisibility(visibility);
                 }
-                // Show zoom preset buttons when device has multi-camera zoom (min zoom < 1x)
+                // Show zoom/camera preset buttons
                 {
                     View zoomPresetsContainer = main_activity.findViewById(R.id.zoom_presets_container);
-                    if( main_activity.getPreview().supportsZoom() && main_activity.getPreview().getMinZoomRatio100() < 100 ) {
+                    if( main_activity.hasParkerCameraPresets() ||
+                        (main_activity.getPreview().supportsZoom() && main_activity.getPreview().getMinZoomRatio100() < 100) ) {
                         zoomPresetsContainer.setVisibility(visibility);
                     }
                     else {
