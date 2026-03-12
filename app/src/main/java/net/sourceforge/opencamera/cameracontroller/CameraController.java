@@ -560,8 +560,16 @@ public abstract class CameraController {
     public abstract boolean getOpticalStabilization();
     /** Set the optical image stabilization mode. When enabled is true, OIS follows the default
      *  device behavior (typically ON). When false, OIS is forced OFF (useful for tripod use).
+     *  Applies the change to the camera immediately.
      */
     public abstract void setOpticalStabilization(boolean enabled);
+    /** Set the OIS flag without applying to the camera. Use when another call (e.g.,
+     *  setVideoStabilization) will apply stabilization settings shortly after.
+     */
+    public void setOpticalStabilizationFlag(boolean enabled) {
+        // default implementation delegates to setOpticalStabilization
+        setOpticalStabilization(enabled);
+    }
     /** Whether to enable digital video stabilization. Should only be set to true when intending to
      *  capture video.
      */

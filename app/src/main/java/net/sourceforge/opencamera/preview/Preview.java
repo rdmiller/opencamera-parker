@@ -2780,20 +2780,25 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         }
 
         {
-            if( MyDebug.LOG )
-                Log.d(TAG, "set up optical stabilization");
+            if( MyDebug.LOG ) {
+                Log.d(TAG, "set up stabilization");
+                Log.d(TAG, "is_video?: " + is_video);
+            }
+            // Set OIS preference flag — this is evaluated inside setStabilization() which
+            // is called by setVideoStabilization/setVideoStabilizationHybrid below.
             if( this.supports_optical_stabilization ) {
                 boolean ois_enabled = applicationInterface.getOpticalStabilizationPref();
                 if( MyDebug.LOG )
                     Log.d(TAG, "ois_enabled: " + ois_enabled);
-                camera_controller.setOpticalStabilization(ois_enabled);
-            }
-        }
-
-        {
-            if( MyDebug.LOG ) {
-                Log.d(TAG, "set up video stabilization");
-                Log.d(TAG, "is_video?: " + is_video);
+                // If video stabilization is also supported, just set the flag — the
+                // setVideoStabilization call below will apply both in one camera request.
+                // Otherwise, apply OIS directly since nothing else will trigger setStabilization.
+                if( this.supports_video_stabilization ) {
+                    camera_controller.setOpticalStabilizationFlag(ois_enabled);
+                }
+                else {
+                    camera_controller.setOpticalStabilization(ois_enabled);
+                }
             }
             if( this.supports_video_stabilization ) {
                 boolean using_video_stabilization = is_video && applicationInterface.getVideoStabilizationPref();

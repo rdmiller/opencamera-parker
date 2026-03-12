@@ -5291,6 +5291,13 @@ public class CameraController2 extends CameraController {
     }
 
     @Override
+    public void setOpticalStabilizationFlag(boolean enabled) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "setOpticalStabilizationFlag: " + enabled);
+        camera_settings.optical_stabilization_enabled = enabled;
+    }
+
+    @Override
     public boolean getVideoStabilization() {
         return camera_settings.video_stabilization;
     }
