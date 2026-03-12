@@ -714,19 +714,20 @@ public class MainUI {
             int margin = (int) (20 * scale + 0.5f); // convert dps to pixels
             setFixedRotation(main_activity.findViewById(R.id.zoom_seekbar), 0, navigation_gap_reverse_landscape_align_parent_bottom, margin+navigation_gap, navigation_gap_landscape_align_parent_bottom);
 
-            // position zoom presets above the zoom seekbar
+            // position zoom/camera presets at bottom-center of screen
             view = main_activity.findViewById(R.id.zoom_presets_container);
             layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-            layoutParams.addRule(above, R.id.zoom_seekbar);
+            layoutParams.addRule(above, 0);
             layoutParams.addRule(below, 0);
             layoutParams.addRule(align_parent_left, 0);
-            layoutParams.addRule(align_parent_right, RelativeLayout.TRUE);
+            layoutParams.addRule(align_parent_right, 0);
             layoutParams.addRule(align_parent_top, 0);
-            layoutParams.addRule(align_parent_bottom, 0);
+            layoutParams.addRule(align_parent_bottom, RelativeLayout.TRUE);
             layoutParams.addRule(left_of, 0);
             layoutParams.addRule(right_of, 0);
-            int preset_margin = (int) (8 * scale + 0.5f);
-            layoutParams.setMargins(0, 0, preset_margin + navigation_gap, 0);
+            layoutParams.addRule(center_horizontal, RelativeLayout.TRUE);
+            int preset_margin = (int) (16 * scale + 0.5f);
+            layoutParams.setMargins(0, 0, 0, preset_margin + navigation_gap);
             view.setLayoutParams(layoutParams);
             setViewRotation(view, ui_rotation);
 
