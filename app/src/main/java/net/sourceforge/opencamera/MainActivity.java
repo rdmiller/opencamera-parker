@@ -2987,6 +2987,9 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
         if( current == parker_camera_ids[0] ) {
             active = 0; // wide
         }
+        else if( current == parker_camera_ids[2] ) {
+            active = 2; // telephoto
+        }
         else if( current == parker_camera_ids[1] ) {
             int zoom_ratio = preview.getCurrentZoomRatio();
             active = (zoom_ratio >= 250) ? 2 : 1; // 2.5x+ = tele, else 1x
