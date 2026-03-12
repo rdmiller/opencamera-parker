@@ -2801,14 +2801,18 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
             int target_camera = parker_camera_ids[1]; // composite
             int current_camera = getActualCameraId();
             if( current_camera != target_camera ) {
+                // camera switch is async; defer zoom until cameraSetup() completes
+                pending_zoom_after_switch = 300;
                 switchToParkerCamera(target_camera);
             }
-            // zoom to 3x on the composite camera
-            int zoom_index = preview.findZoomIndexForRatio(300);
-            if( zoom_index >= 0 ) {
-                preview.zoomTo(zoom_index, false, true);
+            else {
+                // already on composite camera, zoom immediately
+                int zoom_index = preview.findZoomIndexForRatio(300);
+                if( zoom_index >= 0 ) {
+                    preview.zoomTo(zoom_index, false, true);
+                }
+                updateZoomPresetHighlight();
             }
-            updateZoomPresetHighlight();
         }
         else {
             zoomToPresetRatio(300);
@@ -2848,6 +2852,9 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
             parker_camera_ids = null;
         }
     }
+
+    /** Zoom ratio (x100) to apply after the next camera switch completes, or -1 for none. */
+    private int pending_zoom_after_switch = -1;
 
     /** Returns true if this device has parker-specific camera presets. */
     public boolean hasParkerCameraPresets() {
@@ -6242,6 +6249,14 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
 
         mainUI.setTakePhotoIcon();
         mainUI.setSwitchCameraContentDescription();
+        // apply any deferred zoom from a preset button that triggered a camera switch
+        if( pending_zoom_after_switch > 0 ) {
+            int zoom_index = preview.findZoomIndexForRatio(pending_zoom_after_switch);
+            if( zoom_index >= 0 ) {
+                preview.zoomTo(zoom_index, false, true);
+            }
+            pending_zoom_after_switch = -1;
+        }
         updateZoomPresetHighlight();
         if( MyDebug.LOG )
             Log.d(TAG, "cameraSetup: time after setting take photo icon: " + (System.currentTimeMillis() - debug_time));
