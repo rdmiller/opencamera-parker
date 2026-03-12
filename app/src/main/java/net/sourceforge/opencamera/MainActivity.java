@@ -439,6 +439,8 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
             this.front_camera_ids = new ArrayList<>();
             this.other_camera_ids = new ArrayList<>();
             for(int i=0;i<n_cameras;i++) {
+                if( isHiddenCameraId(i) )
+                    continue;
                 switch( preview.getCameraControllerManager().getFacing(i) ) {
                     case FACING_BACK:
                         back_camera_ids.add(i);
@@ -2509,9 +2511,28 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
                 // only show cameras with same facing
                 continue;
             }
+            if( isHiddenCameraId(i) )
+                continue;
             logical_camera_ids.add(i);
         }
         return logical_camera_ids;
+    }
+
+    /** Returns a set of camera IDs to hide from the multi-camera dialog.
+     *  On the Motorola One Zoom (parker), cameras 5 and 6 are non-functional
+     *  sub-radio entries that crash or have broken zoom.
+     */
+    private static java.util.Set<Integer> hidden_camera_ids;
+    static {
+        hidden_camera_ids = new java.util.HashSet<>();
+        if( "motorola".equalsIgnoreCase(Build.MANUFACTURER) && "motorola one zoom".equalsIgnoreCase(Build.MODEL) ) {
+            hidden_camera_ids.add(5);
+            hidden_camera_ids.add(6);
+        }
+    }
+
+    private boolean isHiddenCameraId(int camera_id) {
+        return hidden_camera_ids.contains(camera_id);
     }
 
     private AlertDialog switch_multi_camera_dialog;
