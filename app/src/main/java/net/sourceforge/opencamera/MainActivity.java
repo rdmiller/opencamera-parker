@@ -2966,7 +2966,7 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
      */
     private static final int[] parker_camera_ids;
     static {
-        if( "motorola".equalsIgnoreCase(Build.MANUFACTURER) && "motorola one zoom".equalsIgnoreCase(Build.MODEL) ) {
+        if( MyApplicationInterface.isParkerDevice() ) {
             parker_camera_ids = new int[]{ 3, 7, 4 };
         }
         else {
