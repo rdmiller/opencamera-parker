@@ -1091,9 +1091,13 @@ public class CameraController2 extends CameraController {
             builder.set(CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE, video_stabilization ? CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE_ON : CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE_OFF);
             if( supports_optical_stabilization ) {
                 if( !optical_stabilization_enabled ) {
-                    // User has explicitly disabled OIS (e.g., tripod use)
-                    if( MyDebug.LOG )
+                    // User has explicitly disabled OIS (e.g., tripod use) — takes priority
+                    // over hybrid mode since the user explicitly chose to turn OIS off.
+                    if( MyDebug.LOG ) {
                         Log.d(TAG, "OIS forced off by user preference");
+                        if( video_stabilization && keep_ois_with_eis )
+                            Log.d(TAG, "note: hybrid stabilization mode overridden by OIS toggle");
+                    }
                     if( default_optical_stabilization == null ) {
                         default_optical_stabilization = builder.get(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE);
                     }
