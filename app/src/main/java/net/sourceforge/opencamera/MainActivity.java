@@ -2875,7 +2875,7 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
         float minRatio = preview.getZoomRatio(0);
         float maxRatio = preview.getZoomRatio(preview.getMaxZoom());
         if( maxRatio <= minRatio ) {
-            return PARKER_ZOOM_STEPS;
+            return 0;
         }
         // t = ln(maxRatio/ratio) / ln(maxRatio/minRatio), in [0,1]
         float t = (float)(Math.log(maxRatio / ratio) / Math.log(maxRatio / minRatio));
