@@ -2921,14 +2921,19 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
      *  - On composite (camera 7) at minimum zoom (1x): switch to ultra-wide (camera 3)
      *  - On ultra-wide (camera 3) at maximum zoom: switch to composite (camera 7) at 1x
      */
+    private static final long AUTO_LENS_SWITCH_DEBOUNCE_MS = 800;
+
     private boolean tryAutoLensSwitch() {
-        if( parker_camera_ids == null || preview.getCameraController() == null )
+        if( parker_camera_ids == null )
+            return false;
+        CameraController camera_controller = preview.getCameraController();
+        if( camera_controller == null )
             return false;
         long now = System.currentTimeMillis();
-        if( now - last_auto_lens_switch_time < 800 )
+        if( now - last_auto_lens_switch_time < AUTO_LENS_SWITCH_DEBOUNCE_MS )
             return false; // debounce
         int current = getActualCameraId();
-        int zoom = preview.getCameraController().getZoom();
+        int zoom = camera_controller.getZoom();
         if( current == parker_camera_ids[1] && zoom == 0 ) {
             // On composite at minimum zoom → switch to ultra-wide
             last_auto_lens_switch_time = now;
