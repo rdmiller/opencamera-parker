@@ -6260,7 +6260,11 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
         if( pending_zoom_after_switch > 0 ) {
             int zoom_index = preview.findZoomIndexForRatio(pending_zoom_after_switch);
             if( zoom_index >= 0 ) {
-                preview.zoomTo(zoom_index, false, true);
+                // use instant zoom (no transition) so seekbar and highlight read correct value
+                preview.zoomTo(zoom_index, false, false);
+                // sync the seekbar position
+                SeekBar zoomSeekBar = findViewById(R.id.zoom_seekbar);
+                zoomSeekBar.setProgress(preview.getMaxZoom() - zoom_index);
             }
             pending_zoom_after_switch = -1;
         }
