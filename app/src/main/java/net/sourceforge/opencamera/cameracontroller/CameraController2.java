@@ -397,6 +397,10 @@ public class CameraController2 extends CameraController {
         private int noise_reduction_mode = CameraMetadata.NOISE_REDUCTION_MODE_FAST;
         private boolean has_default_noise_reduction_mode;
         private Integer default_noise_reduction_mode;
+        private boolean has_distortion_correction_mode;
+        private int distortion_correction_mode = 1; // DISTORTION_CORRECTION_MODE_FAST
+        private boolean has_default_distortion_correction_mode;
+        private Integer default_distortion_correction_mode;
         private int white_balance_temperature = 5000; // used for white_balance == CONTROL_AWB_MODE_OFF
         private String flash_value = "flash_off";
         private boolean has_iso;
@@ -506,6 +510,7 @@ public class CameraController2 extends CameraController {
 
             setEdgeMode(builder);
             setNoiseReductionMode(builder);
+            setDistortionCorrectionMode(builder);
 
             /*builder.set(CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE, CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE_OFF);
             builder.set(CaptureRequest.SHADING_MODE, CaptureRequest.SHADING_MODE_OFF);
@@ -791,6 +796,46 @@ public class CameraController2 extends CameraController {
             else if( has_default_noise_reduction_mode ) {
                 if( builder.get(CaptureRequest.NOISE_REDUCTION_MODE) != null && !builder.get(CaptureRequest.NOISE_REDUCTION_MODE).equals(default_noise_reduction_mode)) {
                     builder.set(CaptureRequest.NOISE_REDUCTION_MODE, default_noise_reduction_mode);
+                    changed = true;
+                }
+            }
+            return changed;
+        }
+
+        private boolean setDistortionCorrectionMode(CaptureRequest.Builder builder) {
+            if( MyDebug.LOG ) {
+                Log.d(TAG, "setDistortionCorrectionMode");
+                Log.d(TAG, "has_default_distortion_correction_mode: " + has_default_distortion_correction_mode);
+                Log.d(TAG, "default_distortion_correction_mode: " + default_distortion_correction_mode);
+            }
+            boolean changed = false;
+            if( Build.VERSION.SDK_INT < Build.VERSION_CODES.P ) {
+                // DISTORTION_CORRECTION_MODE requires API 28+
+            }
+            else if( sessionType == SessionType.SESSIONTYPE_EXTENSION ) {
+                // don't set for extensions
+            }
+            else if( has_distortion_correction_mode ) {
+                if( !has_default_distortion_correction_mode ) {
+                    has_default_distortion_correction_mode = true;
+                    default_distortion_correction_mode = builder.get(CaptureRequest.DISTORTION_CORRECTION_MODE);
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "default_distortion_correction_mode: " + default_distortion_correction_mode);
+                }
+                if( builder.get(CaptureRequest.DISTORTION_CORRECTION_MODE) == null || builder.get(CaptureRequest.DISTORTION_CORRECTION_MODE) != distortion_correction_mode ) {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "setting distortion_correction_mode: " + distortion_correction_mode);
+                    builder.set(CaptureRequest.DISTORTION_CORRECTION_MODE, distortion_correction_mode);
+                    changed = true;
+                }
+                else {
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "distortion_correction_mode was already set: " + distortion_correction_mode);
+                }
+            }
+            else if( has_default_distortion_correction_mode ) {
+                if( builder.get(CaptureRequest.DISTORTION_CORRECTION_MODE) != null && !builder.get(CaptureRequest.DISTORTION_CORRECTION_MODE).equals(default_distortion_correction_mode) ) {
+                    builder.set(CaptureRequest.DISTORTION_CORRECTION_MODE, default_distortion_correction_mode);
                     changed = true;
                 }
             }
@@ -4480,6 +4525,103 @@ public class CameraController2 extends CameraController {
             return null;
         int value2 = previewBuilder.get(CaptureRequest.NOISE_REDUCTION_MODE);
         return convertNoiseReductionMode(value2);
+    }
+
+    private String convertDistortionCorrectionMode(int value2) {
+        if( Build.VERSION.SDK_INT < Build.VERSION_CODES.P ) {
+            return null;
+        }
+        String value;
+        switch( value2 ) {
+        case CameraMetadata.DISTORTION_CORRECTION_MODE_FAST:
+            value = "fast";
+            break;
+        case CameraMetadata.DISTORTION_CORRECTION_MODE_HIGH_QUALITY:
+            value = "high_quality";
+            break;
+        case CameraMetadata.DISTORTION_CORRECTION_MODE_OFF:
+            value = "off";
+            break;
+        default:
+            if( MyDebug.LOG )
+                Log.d(TAG, "unknown distortion_correction_mode: " + value2);
+            value = null;
+            break;
+        }
+        return value;
+    }
+
+    @Override
+    public SupportedValues setDistortionCorrectionMode(String value) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "setDistortionCorrectionMode: " + value);
+        if( Build.VERSION.SDK_INT < Build.VERSION_CODES.P ) {
+            return null;
+        }
+        int [] values2 = characteristics.get(CameraCharacteristics.DISTORTION_CORRECTION_AVAILABLE_MODES);
+        if( values2 == null ) {
+            return null;
+        }
+        List<String> values = new ArrayList<>();
+        values.add(DISTORTION_CORRECTION_MODE_DEFAULT);
+        for(int value2 : values2) {
+            String this_value = convertDistortionCorrectionMode(value2);
+            if( this_value != null ) {
+                values.add(this_value);
+            }
+        }
+        SupportedValues supported_values = checkModeIsSupported(values, value, DISTORTION_CORRECTION_MODE_DEFAULT);
+        if( supported_values != null ) {
+            if( supported_values.selected_value.equals(value) ) {
+                boolean has_distortion_correction_mode = false;
+                int selected_value2 = CameraMetadata.DISTORTION_CORRECTION_MODE_FAST;
+                if( !value.equals(DISTORTION_CORRECTION_MODE_DEFAULT) ) {
+                    switch(supported_values.selected_value) {
+                        case "fast":
+                            has_distortion_correction_mode = true;
+                            selected_value2 = CameraMetadata.DISTORTION_CORRECTION_MODE_FAST;
+                            break;
+                        case "high_quality":
+                            has_distortion_correction_mode = true;
+                            selected_value2 = CameraMetadata.DISTORTION_CORRECTION_MODE_HIGH_QUALITY;
+                            break;
+                        case "off":
+                            has_distortion_correction_mode = true;
+                            selected_value2 = CameraMetadata.DISTORTION_CORRECTION_MODE_OFF;
+                            break;
+                        default:
+                            if( MyDebug.LOG )
+                                Log.d(TAG, "unknown selected_value: " + supported_values.selected_value);
+                            break;
+                    }
+                }
+
+                if( camera_settings.has_distortion_correction_mode != has_distortion_correction_mode || camera_settings.distortion_correction_mode != selected_value2 ) {
+                    camera_settings.has_distortion_correction_mode = has_distortion_correction_mode;
+                    camera_settings.distortion_correction_mode = selected_value2;
+                    if( camera_settings.setDistortionCorrectionMode(previewBuilder) ) {
+                        try {
+                            setRepeatingRequest();
+                        }
+                        catch(CameraAccessException e) {
+                            MyDebug.logStackTrace(TAG, "failed to set distortion_correction_mode", e);
+                        }
+                    }
+                }
+            }
+        }
+        return supported_values;
+    }
+
+    @Override
+    public String getDistortionCorrectionMode() {
+        if( Build.VERSION.SDK_INT < Build.VERSION_CODES.P ) {
+            return null;
+        }
+        if( previewBuilder.get(CaptureRequest.DISTORTION_CORRECTION_MODE) == null )
+            return null;
+        int value2 = previewBuilder.get(CaptureRequest.DISTORTION_CORRECTION_MODE);
+        return convertDistortionCorrectionMode(value2);
     }
 
     @Override

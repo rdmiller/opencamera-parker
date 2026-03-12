@@ -40,6 +40,7 @@ public abstract class CameraController {
     public static final String ANTIBANDING_DEFAULT = "auto"; // chosen to match Camera.Parameters.ANTIBANDING_AUTO, but we also use compatible values for Camera2 API
     public static final String EDGE_MODE_DEFAULT = "default";
     public static final String NOISE_REDUCTION_MODE_DEFAULT = "default";
+    public static final String DISTORTION_CORRECTION_MODE_DEFAULT = "default";
     public static final String ISO_DEFAULT = "auto";
     public static final long EXPOSURE_TIME_DEFAULT = 1000000000L/30; // note, responsibility of callers to check that this is within the valid min/max range
 
@@ -428,6 +429,8 @@ public abstract class CameraController {
     public abstract String getEdgeMode();
     public abstract SupportedValues setNoiseReductionMode(String value);
     public abstract String getNoiseReductionMode();
+    public abstract SupportedValues setDistortionCorrectionMode(String value);
+    public abstract String getDistortionCorrectionMode();
     /** Set an ISO value. Only supported if supports_iso_range is false.
      */
     public abstract SupportedValues setISO(String value);

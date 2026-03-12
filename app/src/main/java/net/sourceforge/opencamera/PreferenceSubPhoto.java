@@ -90,7 +90,12 @@ public class PreferenceSubPhoto extends PreferenceSubScreen {
             CharSequence [] entries = new CharSequence[widths.length];
             CharSequence [] values = new CharSequence[widths.length];
             for(int i=0;i<widths.length;i++) {
-                entries[i] = widths[i] + " x " + heights[i] + " " + Preview.getAspectRatioMPString(getResources(), widths[i], heights[i], supports_burst[i]);
+                String entry = widths[i] + " x " + heights[i] + " " + Preview.getAspectRatioMPString(getResources(), widths[i], heights[i], supports_burst[i]);
+                // Label high-resolution (>40MP) sizes on parker camera 0 as full-res (unbinned sensor output)
+                if( MyApplicationInterface.isParkerDevice() && cameraId == 0 && (long)widths[i] * (long)heights[i] > 40000000L ) {
+                    entry += " (Full Res)";
+                }
+                entries[i] = entry;
                 values[i] = widths[i] + " " + heights[i];
             }
             ListPreference lp = (ListPreference)findPreference("preference_resolution");

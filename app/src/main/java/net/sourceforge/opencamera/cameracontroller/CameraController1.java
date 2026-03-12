@@ -568,6 +568,16 @@ public class CameraController1 extends CameraController {
     }
 
     @Override
+    public SupportedValues setDistortionCorrectionMode(String value) {
+        return null;
+    }
+
+    @Override
+    public String getDistortionCorrectionMode() {
+        return null;
+    }
+
+    @Override
     public SupportedValues setISO(String value) {
         Camera.Parameters parameters = this.getParameters();
         // get available isos - no standard value for this, see http://stackoverflow.com/questions/2978095/android-camera-api-iso-setting

@@ -1007,11 +1007,18 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
         // N.B., in practice the hasSetCameraId() check is pointless as we don't save the camera ID in shared preferences, so it will always
         // be false when application is started from onCreate(), unless resuming from saved instance (in which case we shouldn't be here anyway)
         if( !done_facing && !applicationInterface.hasSetCameraId() ) {
-            if( MyDebug.LOG )
-                Log.d(TAG, "initialise to back camera");
-            // most devices have first camera as back camera anyway so this wouldn't be needed, but some (e.g., LG G6) have first camera
-            // as front camera, so we should explicitly switch to back camera
-            applicationInterface.switchToCamera(false);
+            if( parker_camera_ids != null ) {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "initialise to parker composite camera (camera 7)");
+                applicationInterface.setCameraIdPref(parker_camera_ids[1], null);
+            }
+            else {
+                if( MyDebug.LOG )
+                    Log.d(TAG, "initialise to back camera");
+                // most devices have first camera as back camera anyway so this wouldn't be needed, but some (e.g., LG G6) have first camera
+                // as front camera, so we should explicitly switch to back camera
+                applicationInterface.switchToCamera(false);
+            }
         }
     }
 
@@ -2813,6 +2820,7 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
                 int zoom_index = preview.findZoomIndexForRatio(300);
                 if( zoom_index >= 0 ) {
                     preview.zoomTo(zoom_index, false, true);
+                    syncZoomSeekbar(zoom_index);
                 }
             }
         }
@@ -2821,13 +2829,20 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
         }
     }
 
+    private void syncZoomSeekbar(int zoom_index) {
+        SeekBar zoomSeekBar = findViewById(R.id.zoom_seekbar);
+        zoomSeekBar.setProgress(preview.getMaxZoom() - zoom_index);
+    }
+
     private void switchToParkerCamera(int cameraId) {
         int current = getActualCameraId();
         if( current == cameraId ) {
             // already on this camera, reset zoom to 1x
             int zoom_index = preview.findZoomIndexForRatio(100);
-            if( zoom_index >= 0 )
+            if( zoom_index >= 0 ) {
                 preview.zoomTo(zoom_index, false, true);
+                syncZoomSeekbar(zoom_index);
+            }
             return;
         }
         this.closePopup();
@@ -2838,6 +2853,7 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
         int zoom_index = preview.findZoomIndexForRatio(ratio);
         if( zoom_index >= 0 ) {
             preview.zoomTo(zoom_index, false, true);
+            syncZoomSeekbar(zoom_index);
         }
     }
 

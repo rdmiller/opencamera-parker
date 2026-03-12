@@ -311,6 +311,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
     private List<String> antibanding;
     private List<String> edge_modes;
     private List<String> noise_reduction_modes; // n.b., this is for the Camera2 API setting, not for Open Camera's Noise Reduction photo mode
+    private List<String> distortion_correction_modes;
     private List<String> isos;
     private boolean supports_white_balance_temperature;
     private int min_temperature;
@@ -1677,6 +1678,7 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         antibanding = null;
         edge_modes = null;
         noise_reduction_modes = null;
+        distortion_correction_modes = null;
         isos = null;
         supports_white_balance_temperature = false;
         min_temperature = 0;
@@ -2896,6 +2898,19 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
             // write it back to the user preference
             if( supported_values != null ) {
                 noise_reduction_modes = supported_values.values;
+            }
+        }
+
+        {
+            if( MyDebug.LOG )
+                Log.d(TAG, "set up distortion_correction_mode");
+            String value = applicationInterface.getDistortionCorrectionModePref();
+            if( MyDebug.LOG )
+                Log.d(TAG, "saved distortion_correction_mode: " + value);
+
+            CameraController.SupportedValues supported_values = camera_controller.setDistortionCorrectionMode(value);
+            if( supported_values != null ) {
+                distortion_correction_modes = supported_values.values;
             }
         }
 
@@ -7569,6 +7584,12 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         if( MyDebug.LOG )
             Log.d(TAG, "getSupportedNoiseReductionModes");
         return this.noise_reduction_modes;
+    }
+
+    public List<String> getSupportedDistortionCorrectionModes() {
+        if( MyDebug.LOG )
+            Log.d(TAG, "getSupportedDistortionCorrectionModes");
+        return this.distortion_correction_modes;
     }
 
     public String getISOKey() {

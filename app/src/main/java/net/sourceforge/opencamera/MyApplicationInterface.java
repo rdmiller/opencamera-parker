@@ -504,6 +504,22 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     @Override
+    public String getDistortionCorrectionModePref() {
+        String value = sharedPreferences.getString(PreferenceKeys.DistortionCorrectionModePreferenceKey, CameraController.DISTORTION_CORRECTION_MODE_DEFAULT);
+        if( value.equals(CameraController.DISTORTION_CORRECTION_MODE_DEFAULT) && isParkerDevice() ) {
+            // On parker, default to HIGH_QUALITY for ultra-wide (camera 3) to correct barrel distortion,
+            // FAST for other cameras
+            if( cameraId == 3 ) {
+                return "high_quality";
+            }
+            else {
+                return "fast";
+            }
+        }
+        return value;
+    }
+
+    @Override
     public String getISOPref() {
         return sharedPreferences.getString(PreferenceKeys.ISOPreferenceKey, CameraController.ISO_DEFAULT);
     }
@@ -1282,6 +1298,12 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     /** Detects SM6150 (Snapdragon 675) platform, known to have broken 24-bit PCM audio capture.
      *  Also affects other SM6150-based devices like Motorola One Action, One Vision, etc.
      */
+    /** Detects the Motorola One Zoom (codename "parker") specifically. */
+    public static boolean isParkerDevice() {
+        return "motorola".equalsIgnoreCase(Build.MANUFACTURER) &&
+               "motorola one zoom".equalsIgnoreCase(Build.MODEL);
+    }
+
     public static boolean isSM6150Device() {
         String hardware = Build.HARDWARE != null ? Build.HARDWARE.toLowerCase() : "";
         String board = Build.BOARD != null ? Build.BOARD.toLowerCase() : "";
@@ -3145,6 +3167,7 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         if( MyDebug.LOG )
             Log.d(TAG, "setZoomPref: " + zoom);
         this.zoom_factor = zoom;
+        main_activity.updateZoomPresetHighlight();
     }
 
     @Override

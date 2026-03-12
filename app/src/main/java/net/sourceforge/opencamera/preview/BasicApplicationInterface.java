@@ -90,6 +90,11 @@ public abstract class BasicApplicationInterface implements ApplicationInterface 
     }
 
     @Override
+    public String getDistortionCorrectionModePref() {
+        return CameraController.DISTORTION_CORRECTION_MODE_DEFAULT;
+    }
+
+    @Override
     public String getISOPref() {
         return CameraController.ISO_DEFAULT;
     }
