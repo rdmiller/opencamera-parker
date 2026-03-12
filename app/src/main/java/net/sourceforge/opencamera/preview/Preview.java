@@ -2780,6 +2780,17 @@ public class Preview implements SurfaceHolder.Callback, TextureView.SurfaceTextu
         }
 
         {
+            if( MyDebug.LOG )
+                Log.d(TAG, "set up optical stabilization");
+            if( this.supports_optical_stabilization ) {
+                boolean ois_enabled = applicationInterface.getOpticalStabilizationPref();
+                if( MyDebug.LOG )
+                    Log.d(TAG, "ois_enabled: " + ois_enabled);
+                camera_controller.setOpticalStabilization(ois_enabled);
+            }
+        }
+
+        {
             if( MyDebug.LOG ) {
                 Log.d(TAG, "set up video stabilization");
                 Log.d(TAG, "is_video?: " + is_video);

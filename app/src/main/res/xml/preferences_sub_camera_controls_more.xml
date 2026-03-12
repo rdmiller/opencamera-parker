@@ -12,6 +12,14 @@
         android:defaultValue="none"
         />
 
+    <!--  if we move this to another PreferenceGroup, we should update code to remove this Preference -->
+    <SwitchPreference
+        android:key="preference_optical_stabilization"
+        android:title="@string/preference_optical_stabilization"
+        android:summary="@string/preference_optical_stabilization_summary"
+        android:defaultValue="true"
+        />
+
     <SwitchPreference
         android:key="preference_pause_preview"
         android:title="@string/preference_pause_preview"

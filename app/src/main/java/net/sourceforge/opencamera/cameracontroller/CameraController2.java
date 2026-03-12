@@ -426,6 +426,7 @@ public class CameraController2 extends CameraController {
         private boolean has_face_detect_mode;
         private int face_detect_mode = CaptureRequest.STATISTICS_FACE_DETECT_MODE_OFF;
         private Integer default_optical_stabilization;
+        private boolean optical_stabilization_enabled = true; // user preference: OIS on/off
         private boolean video_stabilization;
         private boolean keep_ois_with_eis; // hybrid mode: keep OIS on when EIS is enabled
         private TonemapProfile tonemap_profile = TonemapProfile.TONEMAPPROFILE_OFF;
@@ -1089,7 +1090,16 @@ public class CameraController2 extends CameraController {
 
             builder.set(CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE, video_stabilization ? CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE_ON : CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE_OFF);
             if( supports_optical_stabilization ) {
-                if( video_stabilization && !keep_ois_with_eis ) {
+                if( !optical_stabilization_enabled ) {
+                    // User has explicitly disabled OIS (e.g., tripod use)
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "OIS forced off by user preference");
+                    if( default_optical_stabilization == null ) {
+                        default_optical_stabilization = builder.get(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE);
+                    }
+                    builder.set(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE, CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE_OFF);
+                }
+                else if( video_stabilization && !keep_ois_with_eis ) {
                     // EIS only: disable OIS to avoid conflicts (original behavior)
                     if( default_optical_stabilization == null ) {
                         // save the default optical_stabilization
@@ -5264,6 +5274,20 @@ public class CameraController2 extends CameraController {
         if( ois_mode == null )
             return false;
         return( ois_mode == CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE_ON );
+    }
+
+    @Override
+    public void setOpticalStabilization(boolean enabled) {
+        if( MyDebug.LOG )
+            Log.d(TAG, "setOpticalStabilization: " + enabled);
+        camera_settings.optical_stabilization_enabled = enabled;
+        camera_settings.setStabilization(previewBuilder);
+        try {
+            setRepeatingRequest();
+        }
+        catch(CameraAccessException e) {
+            MyDebug.logStackTrace(TAG, "failed to set optical stabilization", e);
+        }
     }
 
     @Override

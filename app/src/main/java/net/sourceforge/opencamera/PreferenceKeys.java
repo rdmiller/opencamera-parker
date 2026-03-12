@@ -319,6 +319,8 @@ public class PreferenceKeys {
 
     public static final String GhostImageAlphaPreferenceKey = "ghost_image_alpha";
 
+    public static final String OpticalStabilizationPreferenceKey = "preference_optical_stabilization";
+
     public static final String VideoStabilizationPreferenceKey = "preference_video_stabilization";
 
     public static final String ForceVideo4KPreferenceKey = "preference_force_video_4k";

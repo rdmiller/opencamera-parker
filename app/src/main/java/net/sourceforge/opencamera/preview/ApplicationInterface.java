@@ -114,6 +114,10 @@ public interface ApplicationInterface {
     int getImageQualityPref(); // jpeg quality for taking photos; "90" is a recommended default
     boolean getFaceDetectionPref(); // whether to use face detection mode
     String getVideoQualityPref(); // should be one of Preview.getSupportedVideoQuality() (use Preview.getCamcorderProfile() or Preview.getCamcorderProfileDescription() for details); or return "" to let Preview choose quality
+    /** Whether optical image stabilization (OIS) should be enabled. Returns true by default.
+     *  When false, OIS is forced off (useful for tripod use).
+     */
+    default boolean getOpticalStabilizationPref() { return true; }
     boolean getVideoStabilizationPref(); // whether to use video stabilization for video
     default boolean getVideoStabilizationHybridPref() { return false; } // whether to use hybrid EIS+OIS stabilization
     boolean getForce4KPref(); // whether to force 4K mode - experimental, only really available for some devices that allow 4K recording but don't return it as an available resolution - not recommended for most uses

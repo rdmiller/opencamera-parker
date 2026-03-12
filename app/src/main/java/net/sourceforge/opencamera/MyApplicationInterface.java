@@ -760,6 +760,11 @@ public class MyApplicationInterface extends BasicApplicationInterface {
     }
 
     @Override
+    public boolean getOpticalStabilizationPref() {
+        return sharedPreferences.getBoolean(PreferenceKeys.OpticalStabilizationPreferenceKey, true);
+    }
+
+    @Override
     public boolean getVideoStabilizationPref() {
         return sharedPreferences.getBoolean(PreferenceKeys.VideoStabilizationPreferenceKey, false);
     }

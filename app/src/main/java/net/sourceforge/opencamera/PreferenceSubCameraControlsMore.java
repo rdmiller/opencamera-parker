@@ -35,6 +35,17 @@ public class PreferenceSubCameraControlsMore extends PreferenceSubScreen {
 
         final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
 
+        final boolean supports_optical_stabilization = bundle.getBoolean("supports_optical_stabilization", false);
+        if( MyDebug.LOG )
+            Log.d(TAG, "supports_optical_stabilization: " + supports_optical_stabilization);
+        if( !supports_optical_stabilization ) {
+            Preference pref = findPreference(PreferenceKeys.OpticalStabilizationPreferenceKey);
+            if( pref != null ) {
+                PreferenceGroup pg = (PreferenceGroup)this.findPreference("preferences_root");
+                pg.removePreference(pref);
+            }
+        }
+
         final boolean can_disable_shutter_sound = bundle.getBoolean("can_disable_shutter_sound");
         if( MyDebug.LOG )
             Log.d(TAG, "can_disable_shutter_sound: " + can_disable_shutter_sound);
