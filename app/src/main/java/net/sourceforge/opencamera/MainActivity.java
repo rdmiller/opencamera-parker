@@ -1447,6 +1447,11 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
                     newProgress -= change; // change > 0 = zoom in = decrease progress
                 } while( newProgress > 0 && newProgress < PARKER_ZOOM_STEPS &&
                          progressToZoomIndex(newProgress) == currentIndex );
+                if( newProgress < 0 || newProgress > PARKER_ZOOM_STEPS ) {
+                    // Stepped past the boundary — try switching to adjacent camera
+                    if( tryAutoLensSwitch() )
+                        return;
+                }
                 newProgress = Math.max(0, Math.min(PARKER_ZOOM_STEPS, newProgress));
                 zoomSeekBar.setProgress(newProgress);
             }
@@ -2906,6 +2911,41 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
         }
         this.closePopup();
         userSwitchToCamera(cameraId, null);
+    }
+
+    /** Minimum interval between automatic lens switches to prevent rapid toggling. */
+    private long last_auto_lens_switch_time;
+
+    /** Attempt an automatic camera switch when the user has zoomed to the boundary.
+     *  Returns true if a switch was triggered.
+     *  - On composite (camera 7) at minimum zoom (1x): switch to ultra-wide (camera 3)
+     *  - On ultra-wide (camera 3) at maximum zoom: switch to composite (camera 7) at 1x
+     */
+    private boolean tryAutoLensSwitch() {
+        if( parker_camera_ids == null || preview.getCameraController() == null )
+            return false;
+        long now = System.currentTimeMillis();
+        if( now - last_auto_lens_switch_time < 800 )
+            return false; // debounce
+        int current = getActualCameraId();
+        int zoom = preview.getCameraController().getZoom();
+        if( current == parker_camera_ids[1] && zoom == 0 ) {
+            // On composite at minimum zoom → switch to ultra-wide
+            last_auto_lens_switch_time = now;
+            setZoomPresetHighlight(0);
+            this.closePopup();
+            userSwitchToCamera(parker_camera_ids[0], null);
+            return true;
+        }
+        else if( current == parker_camera_ids[0] && zoom == preview.getMaxZoom() ) {
+            // On ultra-wide at maximum zoom → switch to composite at 1x
+            last_auto_lens_switch_time = now;
+            setZoomPresetHighlight(1);
+            this.closePopup();
+            userSwitchToCamera(parker_camera_ids[1], null);
+            return true;
+        }
+        return false;
     }
 
     private void zoomToPresetRatio(int ratio) {
@@ -6113,6 +6153,8 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
 
                     @Override
                     public void onStopTrackingTouch(SeekBar seekBar) {
+                        // When user releases seekbar at the zoom boundary, try switching cameras
+                        tryAutoLensSwitch();
                     }
                 });
 
