@@ -565,11 +565,9 @@ public abstract class CameraController {
     public abstract void setOpticalStabilization(boolean enabled);
     /** Set the OIS flag without applying to the camera. Use when another call (e.g.,
      *  setVideoStabilization) will apply stabilization settings shortly after.
+     *  Subclasses supporting OIS must override this to avoid issuing a camera request.
      */
-    public void setOpticalStabilizationFlag(boolean enabled) {
-        // default implementation delegates to setOpticalStabilization
-        setOpticalStabilization(enabled);
-    }
+    public abstract void setOpticalStabilizationFlag(boolean enabled);
     /** Whether to enable digital video stabilization. Should only be set to true when intending to
      *  capture video.
      */

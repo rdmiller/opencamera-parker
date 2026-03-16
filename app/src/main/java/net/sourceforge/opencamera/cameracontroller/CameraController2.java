@@ -1104,18 +1104,17 @@ public class CameraController2 extends CameraController {
                     // EIS only: disable OIS to avoid conflicts (original behavior)
                     builder.set(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE, CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE_OFF);
                 }
-                else if( video_stabilization && keep_ois_with_eis ) {
+                else if( video_stabilization ) {
                     // Hybrid mode: keep OIS enabled alongside EIS
                     if( MyDebug.LOG )
                         Log.d(TAG, "hybrid stabilization: keeping OIS on with EIS");
                     builder.set(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE, CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE_ON);
                 }
-                else if( default_optical_stabilization != null ) {
-                    if( builder.get(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE) != null && !builder.get(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE).equals(default_optical_stabilization) ) {
-                        if( MyDebug.LOG )
-                            Log.d(TAG, "set optical stabilization back to: " + default_optical_stabilization);
-                        builder.set(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE, default_optical_stabilization);
-                    }
+                else {
+                    // OIS enabled, no video stabilization: explicitly enable OIS
+                    if( MyDebug.LOG )
+                        Log.d(TAG, "OIS enabled by user preference");
+                    builder.set(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE, CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE_ON);
                 }
             }
         }
@@ -5282,6 +5281,11 @@ public class CameraController2 extends CameraController {
         if( MyDebug.LOG )
             Log.d(TAG, "setOpticalStabilization: " + enabled);
         camera_settings.optical_stabilization_enabled = enabled;
+        if( previewBuilder == null ) {
+            if( MyDebug.LOG )
+                Log.d(TAG, "setOpticalStabilization: previewBuilder is null, skipping");
+            return;
+        }
         camera_settings.setStabilization(previewBuilder);
         try {
             setRepeatingRequest();

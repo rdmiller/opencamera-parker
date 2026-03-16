@@ -1319,15 +1319,15 @@ public class MyApplicationInterface extends BasicApplicationInterface {
         return sharedPreferences.getString(PreferenceKeys.RecordAudioSourcePreferenceKey, "audio_src_camcorder");
     }
 
-    /** Detects SM6150 (Snapdragon 675) platform, known to have broken 24-bit PCM audio capture.
-     *  Also affects other SM6150-based devices like Motorola One Action, One Vision, etc.
-     */
     /** Detects the Motorola One Zoom (codename "parker") specifically. */
     public static boolean isParkerDevice() {
         return "motorola".equalsIgnoreCase(Build.MANUFACTURER) &&
                "motorola one zoom".equalsIgnoreCase(Build.MODEL);
     }
 
+    /** Detects SM6150 (Snapdragon 675) platform, known to have broken 24-bit PCM audio capture.
+     *  Also affects other SM6150-based devices like Motorola One Action, One Vision, etc.
+     */
     public static boolean isSM6150Device() {
         String hardware = Build.HARDWARE != null ? Build.HARDWARE.toLowerCase() : "";
         String board = Build.BOARD != null ? Build.BOARD.toLowerCase() : "";

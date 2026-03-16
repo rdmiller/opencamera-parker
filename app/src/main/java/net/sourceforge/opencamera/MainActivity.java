@@ -1440,6 +1440,8 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
                 // With log-scale seekbar, step in seekbar-progress space and skip positions
                 // that map to the same zoom index for responsive feel
                 SeekBar zoomSeekBar = findViewById(R.id.zoom_seekbar);
+                if( zoomSeekBar == null )
+                    return;
                 int progress = zoomSeekBar.getProgress();
                 int currentIndex = progressToZoomIndex(progress);
                 int newProgress = progress;
@@ -2876,7 +2878,7 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
         float minRatio = preview.getZoomRatio(0);
         float maxRatio = preview.getZoomRatio(preview.getMaxZoom());
         if( maxRatio <= minRatio ) {
-            return 0;
+            return PARKER_ZOOM_STEPS; // degenerate range: show seekbar at minimum zoom position
         }
         // t = ln(maxRatio/ratio) / ln(maxRatio/minRatio), in [0,1]
         float t = (float)(Math.log(maxRatio / ratio) / Math.log(maxRatio / minRatio));
@@ -2914,7 +2916,7 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
         userSwitchToCamera(cameraId, null);
     }
 
-    /** Minimum interval between automatic lens switches to prevent rapid toggling. */
+    /** Timestamp of the last automatic lens switch, used for debouncing. */
     private long last_auto_lens_switch_time;
 
     /** Attempt an automatic camera switch when the user has zoomed to the boundary.
@@ -2930,7 +2932,7 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
         CameraController camera_controller = preview.getCameraController();
         if( camera_controller == null )
             return false;
-        long now = System.currentTimeMillis();
+        long now = android.os.SystemClock.elapsedRealtime();
         if( now - last_auto_lens_switch_time < AUTO_LENS_SWITCH_DEBOUNCE_MS )
             return false; // debounce
         int current = getActualCameraId();
@@ -3011,6 +3013,8 @@ public class MainActivity extends AppCompatActivity implements PreferenceFragmen
         Button wide = findViewById(R.id.zoom_preset_wide);
         Button one = findViewById(R.id.zoom_preset_1x);
         Button tele = findViewById(R.id.zoom_preset_tele);
+        if( wide == null || one == null || tele == null )
+            return;
         float alpha_active = 1.0f;
         float alpha_inactive = 0.4f;
         wide.setAlpha(active == 0 ? alpha_active : alpha_inactive);
